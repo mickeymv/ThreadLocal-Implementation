@@ -4,9 +4,9 @@
  */
 
 #include <iostream>
+#include "threadLocal_test.cpp"
 
-
-int test_threadLocal();
+//int test_threadLocal();
 
 int main(){
 	int err = test_threadLocal();
