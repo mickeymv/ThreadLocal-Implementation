@@ -10,7 +10,7 @@
 
 int main(){
 	int err = test_threadLocal();
-    std::cout<< err<<"\n";
+    std::cout<< "\n\nNumber of errors= "<<err<<"\n\n";
 }
 
 

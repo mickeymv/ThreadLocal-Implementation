@@ -20,8 +20,6 @@ namespace cop5618 {
      * the what method to return an appropriate message.
      */
     struct variable_not_set: public std::exception{
-        
-        
         virtual const char* what() const throw(){
             return "Exception! : Attempting to retrieve a variable which was not set! ";
         }
@@ -35,6 +33,15 @@ private:
     
     //Backing Map data structure which maps the thread-ids to their local variable values
     std::unordered_map<std::thread::id, T> backing_map;
+    
+    /**
+     * We will use this mutex to guard write accesses to data.
+     *
+     * The mutex, which is marked mutable so that methods that do not modify the
+     * object except in acquiring and releasing the lock (for example, get)
+     * can be marked as const.
+     */
+    mutable std::mutex m;  //a mutex.
     
 public:
     
@@ -90,26 +97,25 @@ threadLocal<T>::~threadLocal() {
 
     template<typename T>
     void threadLocal<T>::set(T val) {
-	std::thread::id threadId = std::this_thread::get_id();
-        backing_map[threadId] = val;
-	//std::cout << "\n\nFor thread: "<<threadId<<", Variable set= "<<backing_map.at(threadId)<<"\n";
-        std::cout << "\n"<<backing_map.at(threadId)<<"\n";
+        std::lock_guard<std::mutex> lock(m);
+        backing_map[std::this_thread::get_id()] = val;
     }
     
     template<typename T>
     const T& threadLocal<T>::get() const {
-	std::thread::id threadId = std::this_thread::get_id();
+        std::lock_guard<std::mutex> lock(m);
+        std::thread::id threadId = std::this_thread::get_id();
         if (backing_map.find(threadId) != backing_map.end()) {
-            std::cout << "\n"<<backing_map.at(threadId)<<"\n";
+            return backing_map.at(threadId);
         }
-	else
+        else
             throw variable_not_set();
-        return backing_map.at(threadId);;
     }
 
-template<typename T>
+    template<typename T>
     void threadLocal<T>::remove() {
-         backing_map.erase(std::this_thread::get_id());
+        std::lock_guard<std::mutex> lock(m);
+        backing_map.erase(std::this_thread::get_id());
     }
     
 } /* namespace cop5618 */
