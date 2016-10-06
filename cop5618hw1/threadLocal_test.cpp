@@ -27,7 +27,7 @@ int test_threadLocal() {
     numOfErrors += test_threadLocal2(10);
     numOfErrors += test_threadLocal3(10);
     numOfErrors += test_threadLocal4(2);
-    std::cout<<"\n"<<threadLocalStringVariable.get();
+    threadLocalStringVariable.get();
     return numOfErrors;
 }
 
@@ -48,7 +48,7 @@ int test_threadLocal1(const int num_threads) {
                                       [&sequencer, &threadLocalIntVariable]() mutable ->void
                                       {
                                         threadLocalIntVariable.set(sequencer++);
-                                        std::cout<<"\n"<<threadLocalIntVariable.get()<<"\n";
+                                        threadLocalIntVariable.get();
                                       }
                                       )
                           );
@@ -78,7 +78,7 @@ int test_threadLocal2(const int num_threads) {
                                       [&sequencer, &threadLocalStringVariable]() mutable ->void
                                       {
                                         threadLocalStringVariable.set(std::to_string(sequencer++));
-                                        std::cout<<"\n"<<threadLocalStringVariable.get()<<"\n";
+                                        threadLocalStringVariable.get();
                                       }
                                       )
                           );
@@ -122,18 +122,15 @@ int test_threadLocal3(const int num_threads) {
     //join all the threads
     std::for_each(threads.begin(), threads.end(),
                   std::mem_fn(&std::thread::join));
-    
+    int errors = 0;
     for(int i = 1; i <= num_threads; i++) {
         if(threadValues.at(i) != i) { //Thread at position 1 should have value 1
             std::cout << "\nError! : Value set and returned at postition '"<< i <<"' is not as expected! Got value= '" << threadValues.at(i) <<"'"<< std::endl;
-            return 1;
+            errors++;
         }
-        /*else {
-            std::cout << threadValues.at(i) << std::endl;
-        }*/
     }
     
-    return 0;
+    return errors;
 }
 
 /**
@@ -151,7 +148,7 @@ int test_threadLocal4(const int num_threads) {
                                       [&errors, &threadLocalIntVariable]() mutable ->void
                                       {
                                           try {
-                                          std::cout<<"\n"<<threadLocalIntVariable.get()<<"\n";
+                                          threadLocalIntVariable.get();
                                           //If exception is not thrown, then it is an error, since these thread do not set/initialize their variables.
                                               errors++;
                                           } catch (std::exception& e) {
