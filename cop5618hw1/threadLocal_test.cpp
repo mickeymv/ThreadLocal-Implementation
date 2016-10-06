@@ -14,6 +14,7 @@
 int test_threadLocal1(int num_threads);
 int test_threadLocal2(int num_threads);
 int test_threadLocal3(int num_threads);
+int test_threadLocal4(int num_threads);
 
 
 int test_threadLocal() {
@@ -25,6 +26,7 @@ int test_threadLocal() {
     numOfErrors += test_threadLocal1(10);
     numOfErrors += test_threadLocal2(10);
     numOfErrors += test_threadLocal3(10);
+    numOfErrors += test_threadLocal4(2);
     std::cout<<"\n"<<threadLocalStringVariable.get();
     return numOfErrors;
 }
@@ -132,6 +134,40 @@ int test_threadLocal3(const int num_threads) {
     }
     
     return 0;
+}
+
+/**
+ * test_threadLocal4 tests getting int values before setting (/initialization)
+ *
+ */
+int test_threadLocal4(const int num_threads) {
+    std::vector<std::thread> threads;
+    cop5618::threadLocal<int> threadLocalIntVariable;
+    std::atomic<int> errors(0);
+    
+    for (int t = 0; t < num_threads; t++) {
+        threads.push_back(
+                          std::thread(
+                                      [&errors, &threadLocalIntVariable]() mutable ->void
+                                      {
+                                          try {
+                                          std::cout<<"\n"<<threadLocalIntVariable.get()<<"\n";
+                                          //If exception is not thrown, then it is an error, since these thread do not set/initialize their variables.
+                                              errors++;
+                                          } catch (std::exception& e) {
+                                              //If exception is thrown, then it is correct behaviour, since these thread do not set/initialize their variables, and hence an exception is thrown.
+                                          }
+                                      }
+                                      )
+                          );
+        
+    }
+    
+    //join all the threads
+    std::for_each(threads.begin(), threads.end(),
+                  std::mem_fn(&std::thread::join));
+    
+    return errors;
 }
 
 
