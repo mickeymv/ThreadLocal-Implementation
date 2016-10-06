@@ -108,11 +108,9 @@ int test_threadLocal3(const int num_threads) {
                           std::thread(
                                       [&sequencer, &threadLocalIntVariable, &threadValues]() mutable ->void
                                       {
-                                          threadLocalIntVariable.set(sequencer);
-                                           threadValues[sequencer++] = threadLocalIntVariable.get();
-                                          //std::cout<<"\nSequencer= "<<sequencer<<", get= "<<threadLocalIntVariable.get();
-                                          //Thread at position 1 should have value 1
-                                          //sequencer++;
+                                          int position = sequencer++;
+                                          threadLocalIntVariable.set(position);
+                                           threadValues[position] = threadLocalIntVariable.get();
                                       }
                                       )
                           );
