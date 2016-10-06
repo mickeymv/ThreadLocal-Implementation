@@ -76,9 +76,9 @@ One way to offer better finer grained synchronization is to implement a solution
 
 So therefore, we can have better synchronization by allowing multiple readers and only one writer at any given time for our threadLocal variable. In C++, this could be achieved by using conditional variables, atomic awaits (in C++ it would be wait_for or wait_until on the 'predicates', which are our conditionals) on these conditionals, and by making sure the operations are atomic on them.
 
-For example, we could have variables nr = number of readers and nw = number of writers. The invariant would be nr ≥ 0 ∧ nw ≥ 0 ∧ (nw == 0 ∨  (nw == 1 and nr == 0)).
+For example, we could have conditional variables nr = number of readers and nw = number of writers. The invariant would be nr ≥ 0 ∧ nw ≥ 0 ∧ (nw == 0 ∨  (nw == 1 and nr == 0)).
 
-We would therefore make our methods atomic, and update the state variables as necessarily needed in the invariant.
+We would therefore make our conditional variables atomic, and update the conditional variables as necessarily needed in the invariant within the methods.
 
 get() {
 void startGet()
